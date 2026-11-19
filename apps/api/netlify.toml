@@ -1,0 +1,7 @@
+"$schema" = "https://open-api.netlify.com/netlify.schema.json"
+
+[build]
+  command = "pnpm --filter @repo/api build"
+
+[build.environment]
+  NODE_VERSION = "24"
