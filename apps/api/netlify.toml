@@ -1,7 +1,9 @@
 "$schema" = "https://open-api.netlify.com/netlify.schema.json"
 
 [build]
-  command = "pnpm --filter @repo/api build"
+  # Netlify Server handles all routes for this API-only project.
+  command = "pnpm --filter @repo/api build && mkdir -p apps/api/.netlify/server-publish"
+  publish = "apps/api/.netlify/server-publish"
 
 [build.environment]
   NODE_VERSION = "24"
