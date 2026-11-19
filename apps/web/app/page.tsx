@@ -1,10 +1,10 @@
 import { ArrowRight, ArrowUpRight, Braces, ClipboardList, Layers3, Terminal } from "lucide-react";
-import { cookies } from "next/headers";
+import { getSessionUserId } from "~/lib/session";
 import Link from "next/link";
 import { StudioHeader } from "~/components/StudioHeader";
 
 export default async function Home() {
-  const signedIn = (await cookies()).has("authToken");
+  const signedIn = await getSessionUserId();
   const workspace = signedIn ? "/dashboard" : "/signup";
   return (
     <div className="landing">

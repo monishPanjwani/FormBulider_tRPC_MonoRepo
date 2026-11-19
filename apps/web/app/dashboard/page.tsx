@@ -4,13 +4,13 @@ import React from "react";
 import { trpc } from "~/trpc/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, User, Copy } from "lucide-react";
+import { LogOut, User, Copy, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { data: forms, isLoading: formsLoading, isError: formsError } = trpc.form.getMyForms.useQuery();
-  const { data: user, isLoading: userLoading, isError: userError } = trpc.auth.me.useQuery(undefined, {
+  const { data: user, isLoading: userLoading, error: userError, refetch: retryUser } = trpc.auth.me.useQuery(undefined, {
     retry: false // Don't retry if user is not found
   });
   
@@ -20,6 +20,16 @@ export default function DashboardPage() {
         router.push(`/builder?id=${data.id}`);
       }
     },
+  });
+
+  const utils = trpc.useUtils();
+  const deleteForm = trpc.form.delete.useMutation({
+    onSuccess: async ({ id }) => {
+      utils.form.getMyForms.setData(undefined, forms => forms?.filter(form => form.id !== id));
+      await utils.form.invalidate();
+      toast.success("Form deleted.");
+    },
+    onError: (error) => toast.error(error.message),
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({
@@ -45,18 +55,17 @@ export default function DashboardPage() {
     });
   };
 
-  // If user is permanently errored out (e.g. valid token but user deleted from DB)
   if (userError) {
     return (
       <div className="p-8 max-w-xl mx-auto mt-20 text-center font-sans">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Session Invalidated</h2>
-        <p className="text-muted-foreground mb-8">It looks like your user account no longer exists or your session is invalid.</p>
-        <button
-          onClick={() => logoutMutation.mutate()}
-          className="bg-primary hover:bg-primary text-primary-foreground px-6 py-3 rounded-xl font-medium transition-colors"
-        >
-          {logoutMutation.isPending ? "Logging out..." : "Log Out & Return Home"}
-        </button>
+        <h2 className="text-2xl font-bold mb-4">
+          {userError.data?.code === "UNAUTHORIZED" ? "Sign in to continue" : "Couldn’t load your account"}
+        </h2>
+        {userError.data?.code === "UNAUTHORIZED" ? (
+          <Link href="/login" className="action mx-auto">Log in</Link>
+        ) : (
+          <button type="button" className="action mx-auto" onClick={() => retryUser()}>Try again</button>
+        )}
       </div>
     );
   }
@@ -99,7 +108,19 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {forms?.map((form) => (
           <div key={form.id} className="border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow bg-card flex flex-col">
-            <h2 className="text-xl font-semibold mb-2">{form.title}</h2>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h2 className="break-words min-w-0 text-xl font-semibold">{form.title}</h2>
+              <button
+                type="button" aria-label={`Delete ${form.title}`}
+                className="inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                disabled={deleteForm.isPending}
+                onClick={() => {
+                  if (window.confirm(`Delete “${form.title}” and all its responses? This is permanent.`)) {
+                    deleteForm.mutate({ id: form.id });
+                  }
+                }}
+              ><Trash2 size={15} /> Delete</button>
+            </div>
             <div className="flex flex-col gap-2 mb-4 flex-1">
               <p className="text-muted-foreground text-sm">{form.description}</p>
               {form.visibility === 'private' && Array.isArray(form.allowedEmails) && form.allowedEmails.length > 0 && (
@@ -149,7 +170,8 @@ export default function DashboardPage() {
             </div>
           </div>
         ))}
-        {(!forms || forms.length === 0) && (
+        {formsError && <p role="alert" className="text-destructive">Couldn’t load your forms.</p>}
+        {!formsError && (!forms || forms.length === 0) && (
           <div className="col-span-full text-center py-16 text-muted-foreground border-2 border-dashed border-border rounded-xl">
             <p className="mb-4">No forms found.</p>
             <button

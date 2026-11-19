@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { trpc } from "~/trpc/client";
-import { useRouter } from "next/navigation";
 import { AuthShell } from "~/components/AuthShell";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,7 +17,7 @@ export default function SignupPage() {
 
   const mutation = trpc.auth.createUserWithEmailAndPassword.useMutation({
     onSuccess: () => {
-      router.push("/");
+      window.location.replace("/");
     },
   });
 

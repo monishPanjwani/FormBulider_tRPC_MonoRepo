@@ -1,12 +1,13 @@
 import { publicProcedure, router, protectedProcedure } from "../../trpc";
 import { createFormSubmissionInputModel, getSubmissionsInputModel } from "./model";
-import { formSubmissionService } from "../../services";
+import { requireRespondentAccess } from "../../form-access";
+import { formService, formSubmissionService } from "../../services";
 
 export const formSubmissionRouter = router({
   create: publicProcedure
     .input(createFormSubmissionInputModel)
     .mutation(async ({ input, ctx }) => {
-      // In a real app, you might want to extract IP from req, but for now we pass undefined or use what's in input if provided by client (though not secure)
+      await requireRespondentAccess(ctx, await formService.getFormById(input.formId));
       return await formSubmissionService.submitForm({
         ...input,
         ipAddress: undefined, // Or extracted from context if added

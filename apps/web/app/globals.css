@@ -49,21 +49,21 @@
 :root,
 .form-surface[data-mode="light"] {
   color-scheme: light;
-  --background: #f1f3ed;
-  --foreground: #17251e;
-  --card: #fcfdf8;
-  --muted: #e5eae1;
-  --muted-foreground: #506055;
-  --primary: #20533b;
-  --primary-foreground: #f4ffe8;
-  --accent: #d9edc0;
-  --accent-foreground: #27472e;
-  --border: #bfcabe;
-  --input: #899a8b;
-  --ring: #397747;
+  --background: #f4f6fb;
+  --foreground: #131824;
+  --card: #ffffff;
+  --muted: #e7edf6;
+  --muted-foreground: #4c596e;
+  --primary: #2359b8;
+  --primary-foreground: #ffffff;
+  --accent: #dce8ff;
+  --accent-foreground: #173f80;
+  --border: #c3cddd;
+  --input: #8997ac;
+  --ring: #285dc1;
   --destructive: #ab3445;
-  --chart-1: #20533b;
-  --chart-2: #396e77;
+  --chart-1: #2359b8;
+  --chart-2: #386f9a;
   --chart-3: #6c6840;
   --chart-4: #855b7d;
   --chart-5: #9c5b31;
@@ -72,21 +72,21 @@
 .dark,
 .form-surface[data-mode="dark"] {
   color-scheme: dark;
-  --background: #101913;
-  --foreground: #e5efdf;
-  --card: #18231c;
-  --muted: #233329;
-  --muted-foreground: #adc1b2;
-  --primary: #b8e888;
-  --primary-foreground: #15251a;
-  --accent: #2e4530;
-  --accent-foreground: #c3e6a6;
-  --border: #405548;
-  --input: #667f6c;
-  --ring: #b1e98b;
+  --background: #060608;
+  --foreground: #ececef;
+  --card: #101217;
+  --muted: #191e28;
+  --muted-foreground: #a4aec1;
+  --primary: #80b2ff;
+  --primary-foreground: #071324;
+  --accent: #182a45;
+  --accent-foreground: #b4d4ff;
+  --border: #303745;
+  --input: #63738a;
+  --ring: #8fbfff;
   --destructive: #ffa6ac;
-  --chart-1: #b8e888;
-  --chart-2: #8ec9d1;
+  --chart-1: #80b2ff;
+  --chart-2: #95caed;
   --chart-3: #dbcd84;
   --chart-4: #d6add1;
   --chart-5: #eeb186;
@@ -141,7 +141,7 @@
   }
   .studio-header {
     border-bottom: 1px solid var(--border);
-    background: var(--card);
+    background: var(--background);
   }
   .studio-nav,
   .studio-nav nav,
@@ -178,8 +178,8 @@
     width: 1.7rem;
     height: 1.7rem;
     padding: 0.24rem;
-    background: var(--primary);
-    color: var(--primary-foreground);
+    color: var(--primary);
+    border: 1px solid var(--primary);
     border-radius: 4px;
   }
   .brand-dot {
@@ -242,7 +242,7 @@
     font-size: clamp(3.7rem, 7.8vw, 7.5rem);
     font-weight: 580;
     line-height: 0.91;
-    letter-spacing: -0.085em;
+    letter-spacing: -0.072em;
   }
   .hero h1 em {
     color: var(--primary);
@@ -263,10 +263,10 @@
     margin-block: 1.6rem 2rem;
   }
   .specimen {
-    background: #13261c;
-    color: #eef4e7;
+    background: #090b10;
+    color: #eef2fa;
     border-radius: 0.65rem;
-    border: 1px solid #3c5846;
+    border: 1px solid #333d4e;
     box-shadow: 8px 8px 0 var(--accent);
     overflow: hidden;
   }
@@ -275,15 +275,15 @@
     display: flex;
     align-items: center;
     padding: 0.85rem 1.2rem;
-    background: #1d3024;
-    color: #c0d2be;
+    background: #141922;
+    color: #b6c6dc;
     font:
       0.75rem var(--font-geist-mono),
       monospace;
   }
   .specimen-bar {
     justify-content: space-between;
-    border-bottom: 1px solid #405747;
+    border-bottom: 1px solid #323d50;
   }
   .specimen-bar span {
     display: inline-flex;
@@ -292,12 +292,12 @@
   }
   .specimen-content {
     padding: clamp(1.4rem, 3vw, 2.6rem);
-    background-image: radial-gradient(#80978333 1px, transparent 1px);
+    background-image: radial-gradient(#7183a333 1px, transparent 1px);
     background-size: 12px 12px;
   }
   .specimen .meta,
   .specimen h2 span {
-    color: #b9ec88;
+    color: #82b4ff;
   }
   .specimen h2 {
     margin-top: 0.55rem;
@@ -308,18 +308,18 @@
   }
   .specimen p {
     font-size: 0.92rem;
-    color: #bcccbf;
+    color: #afbdd0;
     margin: 0.6rem 0 1.5rem;
   }
   .sample-label {
-    color: #cadac8;
+    color: #c1cde0;
     margin: 1rem 0 0.45rem;
   }
   .sample-input,
   .sample-options span {
     display: block;
-    background: #1d3225;
-    border: 1px solid #526d58;
+    background: #131b28;
+    border: 1px solid #485972;
     border-radius: 4px;
     padding: 0.55rem 0.75rem;
     font-size: 0.9rem;
@@ -329,17 +329,17 @@
     gap: 0.5rem;
   }
   .sample-options span:first-child {
-    color: #c3f098;
-    border-color: #88ab71;
+    color: #a6caff;
+    border-color: #648ac2;
   }
   .specimen figcaption {
-    border-top: 1px solid #405747;
+    border-top: 1px solid #323d50;
     gap: 0.55rem;
   }
   .status-dot {
     width: 0.5rem;
     height: 0.5rem;
-    background: #b9ec88;
+    background: #82b4ff;
     border-radius: 50%;
   }
   .workflow,

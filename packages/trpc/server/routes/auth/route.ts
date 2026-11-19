@@ -8,7 +8,7 @@ import {
 } from "./model";
 
 import { generatePath } from "../../utils/path-generator";
-import process from "node:process";
+import { startSession, endSession, refreshSession } from "../../session";
 
 import { userService } from "../../services";
 
@@ -29,26 +29,15 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { firstName, lastName, email, password } = input;
 
-      const { res, token } = await userService.createUserWithEmailAndPassword({
+      const user = await userService.createUserWithEmailAndPassword({
         firstName,
         lastName,
         email,
         password,
       });
 
-      ctx.setCookie("authToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "development" ? false : true,
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        path: "/",
-      });
-
-      let { id } = res;
-
-      return {
-        id,
-      };
+      await startSession(ctx, user.id);
+      return { id: user.id };
     }),
   loginWithEmailAndPassword: publicProcedure
     .meta({
@@ -63,25 +52,18 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { email, password } = input;
 
-      const { res, token } = await userService.loginWithEmailAndPassword({
+      const user = await userService.loginWithEmailAndPassword({
         email,
         password,
       });
 
-      ctx.setCookie("authToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "development" ? false : true,
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        path: "/",
-      });
-
-      let { id } = res;
-
-      return {
-        id,
-      };
+      await startSession(ctx, user.id);
+      return { id: user.id };
     }),
+  refreshSession: publicProcedure.mutation(async ({ ctx }) => {
+    await refreshSession(ctx);
+    return { success: true };
+  }),
   me: protectedProcedure
     .query(async ({ ctx }) => {
       const user = await userService.getUserById(ctx.user!.id);
@@ -95,13 +77,7 @@ export const authRouter = router({
     }),
   logout: publicProcedure
     .mutation(async ({ ctx }) => {
-      ctx.setCookie("authToken", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "development" ? false : true,
-        sameSite: "strict",
-        maxAge: 0,
-        path: "/",
-      });
+      await endSession(ctx);
       return { success: true };
     }),
 });

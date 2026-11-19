@@ -26,6 +26,10 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(["/api", "/trpc"], (_req, res, next) => {
+  res.set("Cache-Control", "private, no-store");
+  next();
+});
 
 app.get("/", (req, res) => {
   return res.json({ message: "Streamyst is up and running..." });
@@ -41,9 +45,9 @@ app.get("/openapi.json", (req, res) => {
 });
 
 logger.debug(`docs: ${env.BASE_URL}/docs`);
-app.use("/docs", async (req, res, next) => {
+app.use("/docs", async (req, res) => {
   const { apiReference } = await import("@scalar/express-api-reference");
-  return apiReference({ url: "/openapi.json" })(req, res, next);
+  return apiReference({ url: "/openapi.json" })(req, res);
 });
 
 app.use(

@@ -13,7 +13,7 @@ export function StudioHeader({ section, children }: { section?: string; children
             formcraft<span className="brand-dot">.</span>
           </span>
         </Link>
-        {section && <span className="nav-section">/ {section}</span>}
+        {section && <span className="nav-section">~/{section}</span>}
         <nav aria-label="Main navigation">
           {children}
           <ThemeToggle />

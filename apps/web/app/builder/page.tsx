@@ -1,13 +1,12 @@
-import { cookies } from "next/headers";
+import { getSessionUserId } from "~/lib/session";
 import { redirect } from "next/navigation";
 import { FormBuilderApp } from "./FormBuilderApp";
 
 export default async function BuilderPage(props: { searchParams: Promise<{ id?: string }> }) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("authToken");
+    const userId = await getSessionUserId();
     const searchParams = await props.searchParams;
 
-    if (!token) {
+    if (!userId) {
         redirect("/login");
     }
 

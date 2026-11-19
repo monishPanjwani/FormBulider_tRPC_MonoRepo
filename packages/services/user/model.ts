@@ -9,12 +9,6 @@ export const createUserWithEmailAndPassword = z.object({
 
 export type createUserWithEmailAndPasswordType = z.infer<typeof createUserWithEmailAndPassword>;
 
-export const generateUserTokenPayload = z.object({
-  id: z.string().describe("user id to generate JWT token"),
-});
-
-export type generateUserTokenPayloadType = z.infer<typeof generateUserTokenPayload>;
-
 export const loginWithEmailAndPassword = z.object({
   email: z.string().email().describe("User's Email"),
   password: z.string().describe("Password"),

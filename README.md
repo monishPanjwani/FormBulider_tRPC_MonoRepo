@@ -45,13 +45,17 @@ Create a `.env` file at the root of the project (you can copy the `.env.example`
 
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dev
-NEXT_PUBLIC_API_URL=http://localhost:8000/trpc
+TRPC_API_URL=http://localhost:8000/trpc
 WEB_URL=http://localhost:3000
 DOC_URL=http://localhost:4000
 JWT_SECRET=your_super_secret_jwt_string
 SALT=12
 NODE_ENV="development"
 ```
+
+For production, set `TRPC_API_URL=https://formbulider.netlify.app/trpc` on Vercel and use the same `JWT_SECRET` on Vercel and Netlify. The browser calls the web app’s own `/trpc` route. Apply the committed migration to Neon with `pnpm --filter @repo/database db:migrate` before deploying the API, then deploy the web app.
+
+Login sets two HTTP-only cookies. The access token lasts up to one hour. The web app renews it on demand using a rotating refresh token whose database record expires 24 hours after login. Signing out removes that device’s refresh session. Existing users sign in once after upgrading from the original single-cookie format.
 
 ### 3. Start the Database
 Spin up the local PostgreSQL database using Docker Compose:

@@ -64,7 +64,7 @@ export default class FormService {
   public async deleteForm(id: string, userId: string) {
     const res = await db.delete(formsTable)
       .where(and(eq(formsTable.id, id), eq(formsTable.userId, userId)))
-      .returning();
+      .returning({ id: formsTable.id });
     return res[0] || null;
   }
 }

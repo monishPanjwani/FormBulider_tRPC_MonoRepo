@@ -1,3 +1,5 @@
+import { requireRespondentAccess } from "../../form-access";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, router, protectedProcedure } from "../../trpc";
 import { createFormInputModel, updateFormInputModel, getBySlugInputModel, getByIdInputModel } from "./model";
 import { formService } from "../../services";
@@ -10,6 +12,14 @@ export const formRouter = router({
       return await formService.createForm(ctx.user!.id, input);
     }),
     
+  delete: protectedProcedure
+    .input(getByIdInputModel)
+    .mutation(async ({ input, ctx }) => {
+      const deleted = await formService.deleteForm(input.id, ctx.user!.id);
+      if (!deleted) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+      return { id: deleted.id };
+    }),
+
   update: protectedProcedure
     .input(updateFormInputModel)
     .mutation(async ({ input, ctx }) => {
@@ -29,10 +39,12 @@ export const formRouter = router({
     
   getBySlug: publicProcedure
     .input(getBySlugInputModel)
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const form = await formService.getFormBySlug(input.slug);
-      if (!form) throw new Error("Form not found");
-      return form;
+      if (!form) throw new TRPCError({ code: "NOT_FOUND" });
+      await requireRespondentAccess(ctx, form);
+      const { id, title, description, slug, elements } = form;
+      return { id, title, description, slug, elements };
     }),
     
   getById: protectedProcedure

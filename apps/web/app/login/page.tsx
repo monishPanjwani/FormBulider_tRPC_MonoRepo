@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { trpc } from "~/trpc/client";
-import { useRouter } from "next/navigation";
 import { AuthShell } from "~/components/AuthShell";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -17,7 +15,7 @@ export default function LoginPage() {
 
   const mutation = trpc.auth.loginWithEmailAndPassword.useMutation({
     onSuccess: () => {
-      router.push("/dashboard");
+      window.location.replace("/dashboard");
     },
   });
 
