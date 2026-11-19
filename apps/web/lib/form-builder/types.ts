@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'image' | 'short-input' | 'long-input' | 'poll' | 'email' | 'number' | 'single-select' | 'multi-select' | 'checkbox' | 'dropdown' | 'rating' | 'date';
+export type ElementType = 'text' | 'image' | 'short-input' | 'long-input' | 'poll' | 'url' | 'email' | 'number' | 'single-select' | 'multi-select' | 'checkbox' | 'dropdown' | 'rating' | 'date';
 
 export interface FormElement {
   id: string;
@@ -8,11 +8,10 @@ export interface FormElement {
   props: Record<string, any>; // specific properties for the element (e.g., placeholder, text content, image URL)
 }
 
-export type Theme = 'light' | 'dark' | 'glassmorphism';
+export type Theme = 'auto' | 'light' | 'dark' | 'glassmorphism';
 export type Visibility = 'public' | 'private' | 'unlisted';
 
 export interface FormState {
-  appTheme: 'light' | 'dark';
   elements: FormElement[];
   theme: Theme;
   visibility: Visibility;
@@ -22,7 +21,6 @@ export interface FormState {
   customCanvasBg: string | null;
   customTextColor: string | null;
   companyName: string | null;
-  toggleAppTheme: () => void;
   setCompanyName: (name: string) => void;
   setVisibility: (visibility: Visibility) => void;
   setAllowedEmails: (emails: string[]) => void;

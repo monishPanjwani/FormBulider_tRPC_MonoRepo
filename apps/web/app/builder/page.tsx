@@ -11,5 +11,5 @@ export default async function BuilderPage(props: { searchParams: Promise<{ id?: 
         redirect("/login");
     }
 
-    return <FormBuilderApp formId={searchParams.id} />;
+    return <FormBuilderApp key={searchParams.id} formId={searchParams.id} />;
 }

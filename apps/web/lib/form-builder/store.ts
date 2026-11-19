@@ -3,9 +3,8 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { FormState, Theme } from './types';
 
 export const useFormStore = create<FormState>((set) => ({
-  appTheme: 'dark',
   elements: [],
-  theme: 'light',
+  theme: 'auto',
   visibility: 'unlisted',
   allowedEmails: [],
   backgroundUrl: null,
@@ -38,7 +37,6 @@ export const useFormStore = create<FormState>((set) => ({
     set((state) => ({
       elements: arrayMove(state.elements, oldIndex, newIndex),
     })),
-  toggleAppTheme: () => set((state) => ({ appTheme: state.appTheme === 'dark' ? 'light' : 'dark' })),
   setTheme: (theme: Theme) => set({ theme }),
   setVisibility: (visibility) => set({ visibility }),
   setAllowedEmails: (allowedEmails) => set({ allowedEmails }),

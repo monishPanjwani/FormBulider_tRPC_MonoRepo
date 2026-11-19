@@ -12,6 +12,8 @@ import {
     useSensors,
     DragOverlay,
 } from "@dnd-kit/core";
+import { writeFormDocument } from "../../lib/form-builder/form-document";
+import { ThemeToggle } from "../ThemeToggle";
 import { Sidebar } from "./Sidebar";
 import { Canvas } from "./Canvas";
 import { useFormStore } from "../../lib/form-builder/store";
@@ -40,11 +42,11 @@ const EmailInput = ({ emails, onChange }: { emails: string[], onChange: (emails:
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-1.5 px-2 py-1.5 border border-black/10 dark:border-white/30 rounded-lg bg-white/50 dark:bg-black/50 min-w-[250px] max-w-[400px]">
+        <div className="flex flex-wrap items-center gap-1.5 px-2 py-1.5 border border-border rounded-lg bg-card min-w-[250px] max-w-[400px]">
             {emails.map(email => (
-                <span key={email} className="flex items-center gap-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 px-2 py-0.5 rounded text-xs font-medium">
+                <span key={email} className="flex items-center gap-1 bg-accent text-primary px-2 py-0.5 rounded text-xs font-medium">
                     {email}
-                    <button onClick={() => removeEmail(email)} className="hover:text-indigo-900 dark:hover:text-indigo-100 text-sm leading-none">&times;</button>
+                    <button onClick={() => removeEmail(email)} className="hover:text-primary text-sm leading-none">&times;</button>
                 </span>
             ))}
             <input
@@ -53,7 +55,7 @@ const EmailInput = ({ emails, onChange }: { emails: string[], onChange: (emails:
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 min-w-[120px] bg-transparent outline-none text-xs text-slate-800 dark:text-white"
+                className="flex-1 min-w-[120px] bg-transparent outline-none text-xs text-foreground"
             />
         </div>
     );
@@ -66,8 +68,6 @@ export const FormBuilder: React.FC<{
 }> = ({ onBack, onPreview, formId }) => {
     const {
         addElement,
-        appTheme,
-        toggleAppTheme,
         elements,
         reorderElements,
         backgroundUrl,
@@ -77,9 +77,6 @@ export const FormBuilder: React.FC<{
         allowedEmails,
         setAllowedEmails,
         companyName,
-        theme,
-        customCanvasBg,
-        customTextColor,
     } = useFormStore();
     const [activeId, setActiveId] = React.useState<string | null>(null);
     const router = useRouter();
@@ -156,8 +153,10 @@ export const FormBuilder: React.FC<{
         }
     };
 
+    const utils = trpc.useUtils();
     const updateMutation = trpc.form.update.useMutation({
-        onSuccess: () => {
+        onSuccess: async () => {
+            await utils.form.invalidate();
             toast.success("Form saved successfully!");
             router.push("/dashboard");
         },
@@ -187,13 +186,13 @@ export const FormBuilder: React.FC<{
             visibility: dbVisibility,
             status: dbStatus,
             allowedEmails: allowedEmails,
-            elements: elements,
+            elements: writeFormDocument(useFormStore.getState()),
         });
     };
 
     return (
         <div
-            className={`min-h-screen flex flex-col font-sans transition-colors relative ${appTheme === "dark" ? "dark:bg-black text-slate-100" : "bg-[#f6f4f1] text-slate-900 dark:text-white"}`}
+            className="studio-grid min-h-screen flex flex-col text-foreground relative"
             style={{ backgroundColor: customAppBg || undefined }}
         >
             {/* Background Image Overlay */}
@@ -203,44 +202,44 @@ export const FormBuilder: React.FC<{
                         className="absolute inset-0 bg-cover bg-center"
                         style={{ backgroundImage: `url(${backgroundUrl})` }}
                     />
-                    <div className="absolute inset-0 bg-white/60 dark:bg-black/70 backdrop-blur-sm transition-colors" />
+                    <div className="absolute inset-0 bg-background/75 backdrop-blur-sm transition-colors" />
                 </div>
             )}
 
             {/* Top Navigation / Toolbar */}
-            <div className="h-16 md:h-[72px] border-b border-black/10 dark:border-white/70 dark:border-[#6FC3DF] flex items-center justify-between px-6 bg-white/80 dark:bg-black backdrop-blur-xl shadow-sm z-20 transition-colors">
+            <div className="py-3 flex-wrap gap-3 border-b border-border flex items-center justify-between px-6 bg-card backdrop-blur-xl shadow-sm z-20 transition-colors">
                 <div className="flex items-center gap-4">
                     {onBack && (
                         <button
                             onClick={onBack}
-                            className="px-4 py-2 rounded-full bg-white/80 dark:bg-black hover:bg-white dark:hover:bg-white/20 transition-colors shadow-sm border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] text-sm font-medium"
+                            className="px-4 py-2 rounded-md bg-card hover:bg-card transition-colors shadow-sm border border-border text-sm font-medium"
                         >
                             ← Back
                         </button>
                     )}
-                    <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white dark:text-white">
-                        FormFlow Studio
+                    <h1 className="font-mono text-xl font-semibold tracking-tight text-foreground">
+                        Formcraft Studio
                     </h1>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex flex-wrap items-center gap-3">
                     {/* Visibility Controls */}
-                    <div className="flex items-center bg-[#f6f4f1]/80 dark:bg-black p-1.5 rounded-full border border-black/10 dark:border-white/70 dark:border-[#6FC3DF]">
+                    <div className="flex items-center bg-background p-1.5 rounded-md border border-border">
                         <button
                             onClick={() => setVisibility("public")}
-                            className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${visibility === "public" ? "bg-white dark:bg-white/20 shadow-sm text-indigo-600 dark:text-sky-300" : "text-slate-500 hover:text-slate-700 dark:text-white dark:hover:text-slate-200"}`}
+                            className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${visibility === "public" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             Public
                         </button>
                         <button
                             onClick={() => setVisibility("private")}
-                            className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${visibility === "private" ? "bg-white dark:bg-white/20 shadow-sm text-indigo-600 dark:text-sky-300" : "text-slate-500 hover:text-slate-700 dark:text-white dark:hover:text-slate-200"}`}
+                            className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${visibility === "private" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             Private
                         </button>
                         <button
                             onClick={() => setVisibility("unlisted")}
-                            className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${visibility === "unlisted" ? "bg-white dark:bg-white/20 shadow-sm text-amber-600 dark:text-amber-300" : "text-slate-500 hover:text-slate-700 dark:text-white dark:hover:text-slate-200"}`}
+                            className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${visibility === "unlisted" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             Unlisted
                         </button>
@@ -252,19 +251,12 @@ export const FormBuilder: React.FC<{
                         </div>
                     )}
 
-                    <div className="flex items-center gap-3 border-l border-black/10 dark:border-white/70 dark:border-[#6FC3DF] pl-6">
-                        <button
-                            onClick={toggleAppTheme}
-                            className="px-4 py-2 rounded-full bg-white/80 dark:bg-black text-slate-600 dark:text-white hover:bg-white dark:hover:bg-white/20 transition-colors shadow-sm border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] text-sm font-medium"
-                        >
-                            {appTheme === "dark"
-                                ? "☀️ Light Mode"
-                                : "🌙 Dark Mode"}
-                        </button>
+                    <div className="flex flex-wrap items-center gap-2 sm:border-l sm:border-border sm:pl-4">
+                        <ThemeToggle />
 
                         <button
                             onClick={onPreview}
-                            className="px-4 py-2 bg-white/80 dark:bg-black text-slate-700 dark:text-white border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] hover:bg-white dark:hover:bg-white/20 rounded-full font-medium transition-colors shadow-sm"
+                            className="px-4 py-2 bg-card text-foreground border border-border hover:bg-card rounded-md font-medium transition-colors shadow-sm"
                         >
                             Preview
                         </button>
@@ -272,15 +264,15 @@ export const FormBuilder: React.FC<{
                         <button
                             onClick={handleSaveToDB}
                             disabled={updateMutation.isPending}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-full font-semibold transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2 disabled:opacity-50"
+                            className="bg-primary hover:bg-primary text-primary-foreground px-5 py-2 rounded-md font-semibold transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
                         >
-                            {updateMutation.isPending ? "Saving..." : "Save to DB"}
+                            {updateMutation.isPending ? "Saving..." : "Save form"}
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden z-10 relative">
+            <div className="flex flex-1 flex-col md:flex-row items-stretch z-10 relative">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -288,12 +280,12 @@ export const FormBuilder: React.FC<{
                     onDragEnd={handleDragEnd}
                 >
                     <Sidebar />
-                    <main className="flex-1 overflow-y-auto p-10 flex justify-center">
+                    <main className="min-w-0 flex-1 p-3 md:p-8 flex justify-center">
                         <Canvas />
                     </main>
                     <DragOverlay>
                         {activeId ? (
-                            <div className="p-3 bg-white/90 dark:bg-slate-900/80 shadow-xl rounded-xl border border-indigo-500/40 cursor-grabbing">
+                            <div className="p-3 bg-card shadow-xl rounded-xl border border-primary cursor-grabbing">
                                 Dragging Element
                             </div>
                         ) : null}

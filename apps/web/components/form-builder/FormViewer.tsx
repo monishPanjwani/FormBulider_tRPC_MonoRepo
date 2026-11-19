@@ -1,311 +1,239 @@
 "use client";
-import React, { useState } from "react";
+
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { StudioHeader } from "../StudioHeader";
+import { formSurfaceStyle } from "../../lib/form-builder/surface-style";
 import { useFormStore } from "../../lib/form-builder/store";
-import { FormElement as IFormElement } from "../../lib/form-builder/types";
+import type { FormElement, Theme } from "../../lib/form-builder/types";
 
-const ViewerElementTitle: React.FC<{ el: IFormElement }> = ({ el }) => {
-    if (el.type === "text") return null;
-    if (!el.props.question) return null;
+type Answer = string | number | boolean | string[];
+type Answers = Record<string, Answer>;
+
+function ResponseField({
+  el,
+  value,
+  onChange,
+}: {
+  el: FormElement;
+  value?: Answer;
+  onChange: (value: Answer) => void;
+}) {
+  const { id, type, props } = el;
+  if (type === "text")
     return (
-        <label className="font-semibold text-lg block mb-3">
-            {el.props.question}
-            {el.props.required && <span className="text-rose-500 ml-1">*</span>}
-        </label>
+      <h2 className="border-b border-current/20 pb-3 text-2xl font-semibold tracking-tight">
+        {props.text}
+      </h2>
     );
-};
-
-
-const ViewerElement: React.FC<{ el: IFormElement, value: any, onChange: (val: any) => void }> = ({ el, value, onChange }) => {
-    const { type, props } = el;
-    switch (type) {
-        case "text":
-            return (
-                <h3 className="text-2xl font-semibold tracking-tight border-b border-dashed border-current/20 pb-2">
-                    {props.text}
-                </h3>
-            );
-        case "short-input":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <input
-                        type="text"
-                        value={value || ""}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder={props.placeholder || "Short answer"}
-                        className="w-full p-3 border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] rounded-xl bg-white/80 dark:bg-black placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 transition-shadow"
-                    />
-                </div>
-            );
-        case "long-input":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <textarea
-                        value={value || ""}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder={props.placeholder || "Long description..."}
-                        className="w-full p-3 border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] rounded-xl bg-white/80 dark:bg-black min-h-[110px] placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 transition-shadow"
-                    />
-                </div>
-            );
-        case "email":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <input
-                        type="email"
-                        value={value || ""}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder={props.placeholder || "Email address"}
-                        className="w-full p-3 border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] rounded-xl bg-white/80 dark:bg-black placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 transition-shadow"
-                    />
-                </div>
-            );
-        case "number":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <input
-                        type="number"
-                        value={value || ""}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder={props.placeholder || "Number"}
-                        className="w-full p-3 border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] rounded-xl bg-white/80 dark:bg-black placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 transition-shadow"
-                    />
-                </div>
-            );
-        case "date":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <input
-                        type="date"
-                        value={value || ""}
-                        onChange={(e) => onChange(e.target.value)}
-                        className="w-full p-3 border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] rounded-xl bg-white/80 dark:bg-black placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 transition-shadow text-slate-700 dark:text-white"
-                    />
-                </div>
-            );
-        case "checkbox":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <label className="flex items-center gap-3 cursor-pointer p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors w-fit mt-1">
-                        <input
-                            type="checkbox"
-                            checked={!!value}
-                            onChange={(e) => onChange(e.target.checked)}
-                            className="w-5 h-5 accent-indigo-600 cursor-pointer"
-                        />
-                        <span className="text-lg font-medium">{props.label || "Checkbox Label"}</span>
-                    </label>
-                </div>
-            );
-        case "dropdown":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <select value={value || ""} onChange={(e) => onChange(e.target.value)} className="w-full p-3 border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] rounded-xl bg-white/80 dark:bg-black focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 transition-shadow text-slate-700 dark:text-white">
-                        <option value="" disabled>{props.label || "Select an option"}</option>
-                        <option value="opt1">Option 1</option>
-                        <option value="opt2">Option 2</option>
-                    </select>
-                </div>
-            );
-        case "rating":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    <div className="flex gap-2 text-3xl cursor-pointer w-fit mt-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <span 
-                                key={star}
-                                onClick={() => onChange(star)}
-                                className={star <= (value || 0) ? "text-amber-400" : "text-slate-300 dark:text-slate-600 hover:text-amber-200"}
-                            >
-                                ★
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            );
-        case "single-select":
-        case "multi-select":
-        case "poll":
-            const options = props.options || ["Option 1", "Option 2"];
-            const isMulti = type === "multi-select";
-            return (
-                <div className="flex flex-col gap-2 w-full">
-                    <ViewerElementTitle el={el} />
-                    <div className="flex flex-col gap-2 mt-2">
-                        {options.map((opt: string, i: number) => (
-                            <label
-                                key={i}
-                                className="flex items-center gap-3 cursor-pointer p-2.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors border border-transparent hover:border-black/10 dark:border-white/70 dark:hover:border-white/10"
-                            >
-                                <input
-                                    type={isMulti ? "checkbox" : "radio"}
-                                    name={isMulti ? undefined : `poll-${el.id}`}
-                                    value={opt}
-                                    checked={isMulti ? (value || []).includes(opt) : value === opt}
-                                    onChange={(e) => {
-                                        if (isMulti) {
-                                            const current = value || [];
-                                            const newVal = e.target.checked 
-                                                ? [...current, opt] 
-                                                : current.filter((v: string) => v !== opt);
-                                            onChange(newVal);
-                                        } else {
-                                            onChange(opt);
-                                        }
-                                    }}
-                                    className="w-4 h-4 text-indigo-600 cursor-pointer accent-indigo-600"
-                                />
-                                <span className="cursor-pointer">{opt}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-            );
-        case "image":
-            return (
-                <div className="flex flex-col w-full">
-                    <ViewerElementTitle el={el} />
-                    {props.url && (
-                        <img
-                            src={props.url}
-                            alt="Form Graphic"
-                            className="max-w-full rounded-2xl object-contain h-48 mx-auto shadow-sm"
-                        />
-                    )}
-                </div>
-            );
-        default:
-            return null;
-    }
-};
-
-export const FormViewer: React.FC<{ 
-    onBack?: () => void;
-    onSubmit?: (responses: Record<string, any>) => void;
-    isSubmitting?: boolean;
-    initialElements?: IFormElement[];
-    initialThemeProps?: any;
-}> = ({ onBack, onSubmit, isSubmitting, initialElements, initialThemeProps }) => {
-    const store = useFormStore();
-    
-    // Use store values if in builder, otherwise use passed initial values (for public forms)
-    const elements = initialElements || store.elements;
-    const backgroundUrl = initialThemeProps?.backgroundUrl || store.backgroundUrl;
-    const customAppBg = initialThemeProps?.customAppBg || store.customAppBg;
-    const theme = initialThemeProps?.theme || store.theme;
-    const customCanvasBg = initialThemeProps?.customCanvasBg || store.customCanvasBg;
-    const customTextColor = initialThemeProps?.customTextColor || store.customTextColor;
-    const companyName = initialThemeProps?.companyName || store.companyName;
-    const appTheme = initialThemeProps?.appTheme || store.appTheme;
-
-    const [responses, setResponses] = useState<Record<string, any>>({});
-
-    const handleResponseChange = (id: string, value: any) => {
-        setResponses(prev => ({ ...prev, [id]: value }));
-    };
-
-    const handleSubmit = () => {
-        if (onSubmit) {
-            onSubmit(responses);
-        } else {
-            toast.info("Preview Mode: Form submissions are disabled here.");
-        }
-    };
-
-    const getThemeClasses = () => {
-        switch (theme) {
-            case "dark":
-                return "bg-[#0f172a] text-slate-100 ring-1 ring-white/10 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.65)]";
-            case "glassmorphism":
-                return "bg-white/45 text-slate-900 dark:text-white dark:text-white backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(15,23,42,0.35)] ring-1 ring-white/30";
-            default:
-                return "bg-white text-slate-900 dark:text-white shadow-[0_30px_80px_-40px_rgba(15,23,42,0.35)] ring-1 ring-slate-200/70";
-        }
-    };
-
+  if (type === "image")
     return (
-        <div
-            className={`w-full min-h-screen flex flex-col font-sans transition-colors relative ${appTheme === "dark" ? "dark:bg-black text-slate-100" : "bg-[#f6f4f1] text-slate-900 dark:text-white"}`}
-            style={{ backgroundColor: customAppBg || undefined }}
-        >
-            {/* Background Image Overlay */}
-            {backgroundUrl && (
-                <div className="fixed inset-0 z-0 pointer-events-none">
-                    <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${backgroundUrl})` }}
-                    />
-                    <div className="absolute inset-0 bg-white/60 dark:bg-black/70 backdrop-blur-sm transition-colors" />
-                </div>
-            )}
+      props.url && (
+        <img
+          src={props.url}
+          alt={props.question || "Form illustration"}
+          className="mx-auto max-h-64 rounded-md object-contain"
+        />
+      )
+    );
 
-            {onBack && (
-                <div className="fixed top-6 left-6 z-50">
-                    <button
-                        onClick={onBack}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-black text-slate-700 dark:text-white rounded-full font-medium shadow-lg border border-black/10 dark:border-white/70 dark:border-[#6FC3DF] hover:scale-105 transition-transform"
-                    >
-                        ← Back to Editor
-                    </button>
-                </div>
-            )}
+  const options: string[] = props.options ?? ["Option 1", "Option 2"];
+  const title = props.question || props.placeholder || props.label || "Your answer";
+  const marker = props.required && <span aria-hidden="true"> *</span>;
+  const caption = (
+    <label htmlFor={id} className="mb-2 block font-medium">
+      {title}
+      {marker}
+    </label>
+  );
+  const common = {
+    id,
+    required: !!props.required,
+    className: "form-control",
+    value: String(value ?? ""),
+  };
+  const placeholder = props.placeholder !== title ? props.placeholder : undefined;
 
-            {/* Form Container */}
-            <div className="relative z-10 w-full max-w-3xl mx-auto py-20 px-6">
-                <div
-                    className={`w-full rounded-3xl transition-all duration-300 p-8 md:p-12 flex flex-col gap-8 ${getThemeClasses()}`}
-                    style={{
-                        backgroundColor: customCanvasBg || undefined,
-                        color: customTextColor || undefined,
-                    }}
-                >
-                    {/* Company Name Header */}
-                    {companyName && (
-                        <div className="w-full border-b border-current/20 pb-4 mb-4 text-center">
-                            <h1 className="text-3xl font-black tracking-tight uppercase">
-                                {companyName}
-                            </h1>
-                        </div>
-                    )}
-
-                    <div className="flex flex-col gap-8">
-                        {elements.map((el) => (
-                            <div key={el.id} className="relative">
-                                <ViewerElement 
-                                    el={el} 
-                                    value={responses[el.id]} 
-                                    onChange={(val) => handleResponseChange(el.id, val)} 
-                                />
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="mt-8 pt-8 border-t border-current/20 flex justify-end">
-                        <button
-                            onClick={handleSubmit}
-                            disabled={isSubmitting}
-                            className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full shadow-lg shadow-indigo-600/30 transition-colors w-full sm:w-auto disabled:opacity-50"
-                        >
-                            {isSubmitting ? "Submitting..." : "Submit Responses"}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Footer Brand */}
-                <div className="mt-8 text-center text-sm opacity-50 font-medium pb-8">
-                    Powered by FormFlow
-                </div>
-            </div>
+  switch (type) {
+    case "short-input":
+    case "url":
+    case "email":
+    case "number":
+    case "date":
+      return (
+        <div>
+          {caption}
+          <input
+            {...common}
+            type={type === "short-input" ? "text" : type}
+            placeholder={placeholder}
+            onChange={(event) => onChange(event.target.value)}
+          />
         </div>
-    );
-};
+      );
+    case "long-input":
+      return (
+        <div>
+          {caption}
+          <textarea
+            {...common}
+            rows={4}
+            placeholder={placeholder}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </div>
+      );
+    case "dropdown":
+      return (
+        <div>
+          {caption}
+          <select {...common} onChange={(event) => onChange(event.target.value)}>
+            <option value="">{props.label || "Select an option"}</option>
+            {options.map((opt, i) => (
+              <option key={i} value={props.options ? opt : `opt${i + 1}`}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    case "checkbox":
+      return (
+        <div>
+          {props.question && <p className="mb-2 font-medium">{props.question}</p>}
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={!!value}
+              required={!!props.required}
+              onChange={(event) => onChange(event.target.checked)}
+            />{" "}
+            {props.label || props.question || "Yes"}
+            {marker}
+          </label>
+        </div>
+      );
+    case "rating":
+    case "poll":
+    case "single-select":
+    case "multi-select": {
+      const multiple = type === "multi-select";
+      const selected = Array.isArray(value) ? value : [];
+      const items = type === "rating" ? ["1", "2", "3", "4", "5"] : options;
+      return (
+        <fieldset>
+          <legend className="mb-3 font-medium">
+            {title}
+            {marker}
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            {items.map((opt, i) => (
+              <label
+                key={i}
+                className="flex cursor-pointer items-center gap-2 rounded-md border border-input bg-card px-3 py-2 text-card-foreground has-checked:border-primary has-checked:bg-accent has-checked:text-accent-foreground"
+              >
+                <input
+                  type={multiple ? "checkbox" : "radio"}
+                  name={id}
+                  value={opt}
+                  checked={multiple ? selected.includes(opt) : String(value ?? "") === opt}
+                  required={!!props.required && (!multiple || (!selected.length && i === 0))}
+                  onChange={(event) => {
+                    if (multiple)
+                      onChange(
+                        event.target.checked
+                          ? [...selected, opt]
+                          : selected.filter((item) => item !== opt),
+                      );
+                    else onChange(type === "rating" ? Number(opt) : opt);
+                  }}
+                />
+                {type === "rating" ? `${opt} ★` : opt}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      );
+    }
+  }
+}
 
-export default FormViewer;
+interface FormAppearance {
+  companyName?: string | null;
+  theme?: Theme;
+  backgroundUrl?: string | null;
+  customAppBg?: string | null;
+  customCanvasBg?: string | null;
+  customTextColor?: string | null;
+}
+
+export function FormViewer({
+  onBack,
+  onSubmit,
+  isSubmitting,
+  initialElements,
+  initialThemeProps,
+}: {
+  onBack?: () => void;
+  onSubmit?: (responses: Answers) => void;
+  isSubmitting?: boolean;
+  initialElements?: FormElement[];
+  initialThemeProps?: FormAppearance;
+}) {
+  const store = useFormStore();
+  const appearance = initialElements === undefined ? store : (initialThemeProps ?? {});
+  const elements = initialElements ?? store.elements;
+  const [responses, setResponses] = useState<Answers>({});
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    if (onSubmit) onSubmit(responses);
+    else toast.info("Preview only. Responses are collected on the published form.");
+  }
+  return (
+    <div
+      className="studio-grid min-h-screen"
+      style={{ backgroundColor: appearance.customAppBg ?? undefined }}
+    >
+      <StudioHeader section={onBack ? "preview" : "forms"}>
+        {onBack && (
+          <button type="button" className="inline-flex items-center gap-2" onClick={onBack}>
+            <ArrowLeft size={16} /> Back to editor
+          </button>
+        )}
+      </StudioHeader>
+      <main className="relative isolate px-4 py-10 md:py-16">
+        {appearance.backgroundUrl && (
+          <div
+            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-25"
+            style={{ backgroundImage: `url(${appearance.backgroundUrl})` }}
+          />
+        )}
+        <form
+          onSubmit={submit}
+          data-mode={appearance.theme ?? "auto"}
+          className="form-surface mx-auto grid max-w-2xl gap-7 p-6 md:p-10"
+          style={formSurfaceStyle(appearance.customCanvasBg, appearance.customTextColor)}
+        >
+          {appearance.companyName && (
+            <h1 className="break-words font-mono text-xl font-medium">{appearance.companyName}</h1>
+          )}
+          {elements.map((el) => (
+            <ResponseField
+              key={el.id}
+              el={el}
+              value={responses[el.id]}
+              onChange={(value) => setResponses((prev) => ({ ...prev, [el.id]: value }))}
+            />
+          ))}
+          <div className="border-t border-current/20 pt-5">
+            <button className="action disabled:opacity-60" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting…" : "Submit response"}
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
+}

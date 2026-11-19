@@ -23,7 +23,7 @@ export default async function PublicFormPage(props: { params: Promise<{ slug: st
 
   if (!form) {
     return (
-      <div className="p-8 text-center text-red-500 font-sans">
+      <div className="p-8 text-center text-destructive font-sans">
         Form not found or an error occurred.
       </div>
     );
@@ -32,13 +32,13 @@ export default async function PublicFormPage(props: { params: Promise<{ slug: st
   // 2. Access Control Logic
   if (form.status === "draft" || form.visibility === "unlisted") {
     return (
-      <div className="min-h-screen bg-[#f6f4f1] flex items-center justify-center font-sans">
-        <div className="bg-white p-12 rounded-2xl shadow-sm text-center max-w-md w-full border border-slate-100">
-          <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+      <div className="min-h-screen bg-background flex items-center justify-center font-sans">
+        <div className="bg-card p-12 rounded-lg shadow-sm text-center max-w-md w-full border border-border">
+          <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-md flex items-center justify-center mx-auto mb-6 text-3xl">
             !
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Form Unavailable</h2>
-          <p className="text-slate-500">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Form Unavailable</h2>
+          <p className="text-muted-foreground">
             This form is currently in draft mode and cannot accept submissions.
           </p>
         </div>
@@ -70,13 +70,13 @@ export default async function PublicFormPage(props: { params: Promise<{ slug: st
 
       if (!isOwner && !isAllowed) {
         return (
-          <div className="min-h-screen bg-[#f6f4f1] flex items-center justify-center font-sans">
-            <div className="bg-white p-12 rounded-2xl shadow-sm text-center max-w-md w-full border border-slate-100">
-              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+          <div className="min-h-screen bg-background flex items-center justify-center font-sans">
+            <div className="bg-card p-12 rounded-lg shadow-sm text-center max-w-md w-full border border-border">
+              <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-md flex items-center justify-center mx-auto mb-6 text-3xl">
                 !
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Access Denied</h2>
-              <p className="text-slate-500">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
+              <p className="text-muted-foreground">
                 Sorry, you do not have permission to access this private form. Please ensure you are
                 logged in with an approved email address.
               </p>
